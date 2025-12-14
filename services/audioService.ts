@@ -179,11 +179,30 @@ class AudioService {
     osc.stop(this.ctx.currentTime + duration);
   }
 
-  // Original Tech Typing Sound
+  // New: Classic Typewriter Sound (Mechanical Click)
+  playMechanicalClick() {
+    if (this.isMuted) return;
+    // Square wave gives a "woody" or "plastic" click sound suitable for typewriter keys
+    // Random pitch variance to sound analog
+    const randomFreq = 600 + Math.random() * 200; 
+    // Very short duration for staccato feel
+    this.playTone(randomFreq, 'square', 0.03, 0.15); 
+  }
+
+  // Original Tech Typing Sound (Preserved but not used in cutscene)
   playTyping() {
     if (this.isMuted) return;
     const randomFreq = 800 + Math.random() * 400; 
     this.playTone(randomFreq, 'square', 0.03, 0.05);
+  }
+
+  // NEW: MOBA Battle Start Sound (Gong/Clash)
+  playBattleStart() {
+    if (this.isMuted) return;
+    // Deep impact
+    this.playTone(60, 'sawtooth', 0.8, 0.5, 30);
+    // Metallic shimmer
+    setTimeout(() => this.playTone(800, 'triangle', 0.5, 0.1), 50);
   }
 
   // NEW: MOBA Battle Typing Sound (Metallic/Percussive)

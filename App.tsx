@@ -53,7 +53,14 @@ const LEVEL_BG_IMAGES = [
 ];
 
 // --- TYPEWRITER COMPONENT ---
-const TypewriterText: React.FC<{ text: string; speed?: number; onComplete?: () => void }> = ({ text, speed = 40, onComplete }) => {
+interface TypewriterProps {
+  text: string;
+  speed?: number;
+  onComplete?: () => void;
+  soundMode?: 'none' | 'classic'; // Controls the SFX style
+}
+
+const TypewriterText: React.FC<TypewriterProps> = ({ text, speed = 40, onComplete, soundMode = 'none' }) => {
   const [displayedText, setDisplayedText] = useState('');
   const indexRef = useRef(0);
 
@@ -65,11 +72,13 @@ const TypewriterText: React.FC<{ text: string; speed?: number; onComplete?: () =
       if (indexRef.current < text.length) {
         const char = text.charAt(indexRef.current);
         setDisplayedText((prev) => prev + char);
-        // Play typing sound only for non-space characters
-        // Updated to use Battle Typing sound for MOBA feel
-        if (char !== ' ') {
-            audioManager.playBattleTyping();
+        
+        // Handle Typing Sound
+        if (soundMode === 'classic') {
+          // Play classic typewriter sound
+          audioManager.playMechanicalClick();
         }
+        
         indexRef.current++;
       } else {
         clearInterval(timer);
@@ -78,7 +87,7 @@ const TypewriterText: React.FC<{ text: string; speed?: number; onComplete?: () =
     }, speed);
 
     return () => clearInterval(timer);
-  }, [text, speed, onComplete]);
+  }, [text, speed, onComplete, soundMode]);
 
   return <span>{displayedText}</span>;
 };
@@ -342,8 +351,13 @@ const App: React.FC = () => {
       setPhase(GamePhase.GAMEPLAY);
       
       // Removed AI Image generation for speed. Using Static Images from LEVEL_BG_IMAGES.
+      
+      // Play Battle Sound Effect (replacing the typing sounds)
+      setTimeout(() => {
+          audioManager.playBattleStart();
+          audioManager.playAnnouncer("Launch Attack!");
+      }, 500); 
 
-      setTimeout(() => audioManager.playAnnouncer("Launch Attack!"), 500); 
     } catch (e) {
       console.error(e);
       audioManager.playError();
@@ -878,7 +892,7 @@ const App: React.FC = () => {
             <div className="bg-gradient-to-r from-slate-900/95 to-slate-800/95 border-t border-b border-slate-600 p-6 text-center backdrop-blur-md shadow-2xl relative">
                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-epicBlue shadow-[0_0_10px_#00C2FF]"></div>
                <p className="text-slate-100 font-medium text-lg leading-relaxed font-sans pt-4">
-                 <TypewriterText text={currentLevelData.scenario} speed={35} />
+                 <TypewriterText text={currentLevelData.scenario} speed={35} soundMode="none" />
                </p>
             </div>
 
@@ -970,7 +984,7 @@ const App: React.FC = () => {
                         Mentor Advice
                     </div>
                     <div className="text-slate-200 font-medium text-base leading-relaxed mb-6 mt-2 font-sans min-h-[4rem]">
-                         "<TypewriterText text={npcFeedback.dialogue} />"
+                         "<TypewriterText text={npcFeedback.dialogue} soundMode="classic" />"
                     </div>
                     <div className="bg-epicBlue/10 p-4 border-l-2 border-epicBlue mb-6 flex gap-4 items-center animate-fade-in" style={{ animationDelay: '2s', animationFillMode: 'both' }}>
                         <Icons.Star className="w-6 h-6 text-epicBlue flex-shrink-0 animate-spin-slow" />
@@ -995,42 +1009,88 @@ const App: React.FC = () => {
     let title = "DEFEAT";
     let color = "text-red-500";
     let rank = "Warrior";
+    let mentorFeedback = "";
+    let mentorWisdom = "";
     
-    if (player.iman >= 80) { title = "VICTORY"; color = "text-epicGold"; rank = "MYTHIC"; }
-    else if (player.iman >= 55) { title = "COMPLETED"; color = "text-blue-400"; rank = "LEGEND"; }
+    if (player.iman >= 80) { 
+        title = "VICTORY"; 
+        color = "text-epicGold"; 
+        rank = "MYTHIC"; 
+        mentorFeedback = "Masya Allah! Kamu adalah kesatria sejati. Imanmu kokoh, amalmu menggunung. Pertahankan istiqamah ini!";
+        mentorWisdom = "Sebaik-baik manusia adalah yang paling bermanfaat bagi orang lain.";
+    }
+    else if (player.iman >= 55) { 
+        title = "COMPLETED"; 
+        color = "text-blue-400"; 
+        rank = "LEGEND"; 
+        mentorFeedback = "Perjuangan yang hebat! Meski ada sedikit kelalaian, kamu berhasil bertahan. Teruslah belajar dan perbaiki diri.";
+        mentorWisdom = "Bertaqwalah kepada Allah di mana saja engkau berada.";
+    } else {
+        mentorFeedback = "Jangan putus asa. Kekalahan hari ini adalah pelajaran untuk esok. Perbanyak istighfar dan mulai lagi dengan niat yang kuat.";
+        mentorWisdom = "Sesungguhnya Allah menyukai orang-orang yang bertaubat.";
+    }
 
     return (
-      <div className="h-[100dvh] w-full flex flex-col items-center justify-center p-6 bg-epicDark overflow-hidden">
+      <div className="h-[100dvh] w-full flex flex-col items-center justify-center p-6 bg-epicDark overflow-hidden overflow-y-auto">
         <div className={`absolute inset-0 opacity-20 ${player.iman >= 80 ? 'bg-yellow-500' : 'bg-blue-900'}`}></div>
 
-        <div className="mb-8 animate-victory-pop relative z-10 text-center">
-           <h1 className={`text-6xl md:text-8xl font-hero font-black tracking-tighter ${color} drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]`}>
+        <div className="mb-4 md:mb-8 animate-victory-pop relative z-10 text-center mt-10 md:mt-0">
+           <h1 className={`text-5xl md:text-8xl font-hero font-black tracking-tighter ${color} drop-shadow-[0_0_20px_rgba(0,0,0,0.8)]`}>
              {title}
            </h1>
            <div className="mt-2 text-white font-bold tracking-[1em] text-sm uppercase">Rank: {rank}</div>
         </div>
 
-        <EpicCard className="w-full max-w-lg text-center space-y-6 relative z-10" title="Match Results">
-           <div className="grid grid-cols-3 gap-4">
-              <div className="bg-slate-800/50 p-4 border border-slate-700">
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Iman</div>
-                <div className="text-2xl font-black text-white">{player.iman}</div>
-              </div>
-              <div className="bg-slate-800/50 p-4 border border-slate-700">
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Amal</div>
-                <div className="text-2xl font-black text-epicGold">{player.amal}</div>
-              </div>
-              <div className="bg-slate-800/50 p-4 border border-slate-700">
-                <div className="text-[10px] font-bold text-slate-400 uppercase">Lalai</div>
-                <div className="text-2xl font-black text-red-500">{player.lalai}</div>
-              </div>
-           </div>
-           <div className="pt-4">
-            <EpicButton onClick={restartGame} fullWidth variant="gold">
-                PLAY AGAIN
-            </EpicButton>
-           </div>
-        </EpicCard>
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 pb-10">
+            {/* Stats Card */}
+            <EpicCard className="text-center space-y-6" title="Match Results">
+               <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-slate-800/50 p-4 border border-slate-700">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">Iman</div>
+                    <div className="text-2xl font-black text-white">{player.iman}</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 border border-slate-700">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">Amal</div>
+                    <div className="text-2xl font-black text-epicGold">{player.amal}</div>
+                  </div>
+                  <div className="bg-slate-800/50 p-4 border border-slate-700">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase">Lalai</div>
+                    <div className="text-2xl font-black text-red-500">{player.lalai}</div>
+                  </div>
+               </div>
+               <div className="pt-4">
+                <EpicButton onClick={restartGame} fullWidth variant="gold">
+                    PLAY AGAIN
+                </EpicButton>
+               </div>
+            </EpicCard>
+
+            {/* Mentor Evaluation Card */}
+            <div className="relative bg-slate-900/90 border border-slate-700 p-1 flex flex-col">
+                <div className="absolute -top-3 -right-3 z-20">
+                    <div className="bg-epicBlue text-black font-black text-xs px-3 py-1 uppercase -rotate-6 shadow-lg border border-white">
+                        Mentor Eval
+                    </div>
+                </div>
+                
+                <div className="bg-black/40 flex-1 p-6 flex flex-col items-center text-center">
+                    <div className="mb-4 scale-75 transform -mt-4">
+                        <UstadzEpicAvatar size="md" />
+                    </div>
+                    <h3 className="text-epicBlue font-hero text-lg mb-2 uppercase tracking-wider border-b border-epicBlue/30 pb-2 w-full">
+                        Final Assessment
+                    </h3>
+                    <p className="text-slate-300 text-sm leading-relaxed mb-4 italic">
+                        "{mentorFeedback}"
+                    </p>
+                    <div className="mt-auto w-full bg-epicBlue/5 border border-epicBlue/20 p-3 rounded">
+                        <p className="text-epicGold text-xs font-serif font-bold">
+                            "{mentorWisdom}"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
       </div>
     );
   }
