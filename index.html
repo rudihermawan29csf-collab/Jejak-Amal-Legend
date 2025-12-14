@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Jejak Amal: Legends</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Roboto Condensed"', 'sans-serif'], 
+              hero: ['Cinzel', 'serif'], // Heroic/Legendary font
+            },
+            colors: {
+              epicDark: '#0b1120', // Dark Blue/Black background
+              epicPanel: '#1e293b', // Lighter panel
+              epicGold: '#C9A050', // Metallic Gold
+              epicBlue: '#00C2FF', // Energy Blue
+              epicRed: '#FF2E2E', // Enemy/Danger
+            },
+            backgroundImage: {
+              'hex-pattern': "url(\"data:image/svg+xml,%3Csvg width='24' height='40' viewBox='0 0 24 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 40c5.523 0 10-4.477 10-10V10C10 4.477 5.523 0 0 0h24c-5.523 0-10 4.477-10 10v20c0 5.523 4.477 10 10 10H0z' fill='%231e293b' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E\")",
+              'metal-gradient': 'linear-gradient(180deg, #334155 0%, #1e293b 100%)',
+              'gold-gradient': 'linear-gradient(45deg, #997B36 0%, #F5DCA0 50%, #997B36 100%)',
+            },
+            animation: {
+              'glow-pulse': 'glowPulse 2s infinite',
+              'slide-in': 'slideIn 0.5s ease-out forwards',
+              'victory-pop': 'victoryPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+              'shatter': 'shatter 0.5s ease-out forwards',
+              'slash': 'slash 0.3s ease-out forwards',
+            },
+            keyframes: {
+              glowPulse: {
+                '0%, 100%': { boxShadow: '0 0 10px #00C2FF', borderColor: '#00C2FF' },
+                '50%': { boxShadow: '0 0 20px #00C2FF', borderColor: '#80E1FF' },
+              },
+              slideIn: {
+                '0%': { transform: 'translateX(-100%)', opacity: '0' },
+                '100%': { transform: 'translateX(0)', opacity: '1' },
+              },
+              victoryPop: {
+                '0%': { transform: 'scale(0.5)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+              shatter: {
+                '0%': { transform: 'scale(1)', opacity: '1' },
+                '20%': { transform: 'scale(1.1) rotate(5deg)', opacity: '1' },
+                '100%': { transform: 'scale(1.5) rotate(-10deg)', opacity: '0', filter: 'blur(10px)' },
+              },
+              slash: {
+                '0%': { clipPath: 'polygon(0 0, 0 0, 0 0, 0 0)' },
+                '50%': { clipPath: 'polygon(0 0, 100% 100%, 100% 100%, 0 0)' },
+                '100%': { clipPath: 'polygon(0 0, 100% 100%, 100% 100%, 0 0)', opacity: '0' },
+              }
+            }
+          },
+        },
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body { 
+        font-family: 'Roboto Condensed', sans-serif; 
+        background-color: #050b14;
+        color: #e2e8f0;
+        background-image: 
+          radial-gradient(circle at 50% 0%, #1e293b 0%, #050b14 70%);
+      }
+
+      /* EPIC UI UTILITIES */
+      .epic-card {
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(10px);
+        border: 1px solid #334155;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        clip-path: polygon(
+          20px 0, 100% 0, 
+          100% calc(100% - 20px), calc(100% - 20px) 100%, 
+          0 100%, 0 20px
+        );
+      }
+
+      .epic-border-gold {
+        border: 1px solid transparent;
+        border-image: linear-gradient(to bottom, #C9A050, #634f21) 1;
+      }
+
+      /* Button Styles */
+      .btn-epic {
+        position: relative;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        transition: all 0.2s;
+        border: 1px solid rgba(255,255,255,0.1);
+      }
+      
+      .btn-epic:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.2);
+      }
+      
+      .btn-epic:active {
+        transform: translateY(1px);
+      }
+
+      /* Specific Button Colors */
+      .btn-epic-primary {
+        background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%);
+        border-top: 1px solid #60a5fa;
+        border-bottom: 1px solid #1e3a8a;
+        box-shadow: 0 4px 0 #0f172a;
+      }
+      
+      .btn-epic-gold {
+        background: linear-gradient(180deg, #C9A050 0%, #855e14 100%);
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        border: 1px solid #F5DCA0;
+        box-shadow: 0 0 15px rgba(201, 160, 80, 0.4);
+      }
+
+      /* Text Effects */
+      .text-metallic {
+        background: linear-gradient(180deg, #fff 0%, #94a3b8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      }
+      
+      .text-gold {
+        background: linear-gradient(180deg, #F5DCA0 0%, #C9A050 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 2px rgba(201, 160, 80, 0.5));
+      }
+
+      /* Hexagon Shape */
+      .hex-shape {
+        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      }
+
+      /* Particle dust simulation */
+      .particles {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8Y2lyY2xlIGN4PSIyIiBjeT0iMiIgcj0iMSIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=');
+        animation: floatParticles 20s linear infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+      @keyframes floatParticles {
+        from { background-position: 0 0; }
+        to { background-position: 100px 100px; }
+      }
+      
+      /* SLASH EFFECT */
+      .slash-effect {
+          position: absolute;
+          top: 0; left: 0; width: 100%; height: 100%;
+          background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.9) 50%, transparent 60%);
+          background-size: 200% 200%;
+          mix-blend-mode: overlay;
+          z-index: 50;
+          pointer-events: none;
+      }
+    </style>
+    <script type="importmap">
+    {
+      "imports": {
+        "react/": "https://esm.sh/react@^19.2.3/",
+        "react": "https://esm.sh/react@^19.2.3",
+        "@google/genai": "https://esm.sh/@google/genai@^1.33.0",
+        "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-epicDark text-slate-200 antialiased overflow-hidden selection:bg-epicGold selection:text-black h-full">
+    <div class="particles"></div>
+    <div id="root" class="relative z-10 h-full"></div>
+  </body>
+</html>
