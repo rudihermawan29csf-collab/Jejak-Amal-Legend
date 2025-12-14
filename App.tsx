@@ -247,6 +247,7 @@ const App: React.FC = () => {
             case GamePhase.CHARACTER_SELECT:
             case GamePhase.INTRO_STORY:
             case GamePhase.MAP:
+            case GamePhase.PROCESSING: // Added this to ensure sound plays
                 audioManager.playBGM('lobby');
                 break;
             case GamePhase.GAMEPLAY:
@@ -501,7 +502,7 @@ const App: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto z-10">
             {/* Logo Section - Reduced Scale */}
             <div className="mb-4 transform scale-90">
-               <EpicAvatar size="md" /> 
+               <EpicAvatar size="md" label="PAI" /> 
             </div>
             
             <div className="text-center mb-6">

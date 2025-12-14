@@ -91,7 +91,7 @@ export const Icons = {
 };
 
 // --- AVATAR EPIC (Hero Silhouette) ---
-export const EpicAvatar: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl', color?: string }> = ({ size = 'md', color = '#C9A050' }) => {
+export const EpicAvatar: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl', color?: string, label?: string }> = ({ size = 'md', color = '#C9A050', label = 'LVL' }) => {
   const sizeClasses = {
     sm: "w-12 h-12",
     md: "w-24 h-24",
@@ -133,7 +133,7 @@ export const EpicAvatar: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl', color?: st
       
       {/* Level Badge */}
       <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-black border border-white/20 transform rotate-45 flex items-center justify-center z-20">
-         <div className="transform -rotate-45 font-bold text-xs" style={{ color: color }}>LVL</div>
+         <div className="transform -rotate-45 font-bold text-xs" style={{ color: color }}>{label}</div>
       </div>
     </div>
   );

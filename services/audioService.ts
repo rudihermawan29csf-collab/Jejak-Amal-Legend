@@ -261,7 +261,8 @@ class AudioService {
 
     // Ramp Volume
     // Start quiet, get louder
-    const volume = Math.min(0.2, 0.05 + (normalized * 0.15));
+    // Reduced significantly to ~30% of original max
+    const volume = Math.min(0.06, 0.015 + (normalized * 0.045));
     this.summonGain.gain.setTargetAtTime(volume, this.ctx.currentTime, 0.1);
 
     // Ramp Frequency (Pitch Up)
