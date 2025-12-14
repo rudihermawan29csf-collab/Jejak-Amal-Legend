@@ -48,6 +48,81 @@ const npcSchema: Schema = {
   required: ["dialogue", "wisdom"]
 };
 
+// --- FALLBACK DATA (Offline Mode / Quota Exceeded) ---
+const FALLBACK_LEVEL_DATA: Record<number, Omit<GameLevel, 'id'>> = {
+  0: { // Subuh
+    title: "Fajar Menjelang",
+    scenario: "Suara adzan Subuh sayup-sayup terdengar di tengah dinginnya pagi. Kasurmu terasa sangat nyaman dan berat untuk ditinggalkan.",
+    location: "Kamar Tidur",
+    choices: [
+      { id: "a", text: "Lawan kantuk, wudhu air dingin, ke Masjid.", type: "good", impact: { iman: 15, amal: 20, lalai: 0 }, feedback: "Langkah beratmu diganjar pahala berlipat." },
+      { id: "b", text: "Shalat di kamar saja, masih ngantuk.", type: "neutral", impact: { iman: 5, amal: 5, lalai: 0 }, feedback: "Kewajiban tertunaikan, namun kehilangan fadhilah jamaah." },
+      { id: "c", text: "Tarik selimut lagi, '5 menit lagi...'", type: "bad", impact: { iman: -10, amal: 0, lalai: 15 }, feedback: "Syaitan berhasil mengikatmu dengan buhul kemalasan." }
+    ]
+  },
+  1: { // Sekolah
+    title: "Ujian Kejujuran",
+    scenario: "Saat ujian berlangsung, teman sebangkumu menyodorkan kertas jawaban. Pengawas sedang lengah main HP.",
+    location: "Kelas IX-A",
+    choices: [
+      { id: "a", text: "Tolak tegas dan kerjakan sendiri sebisanya.", type: "good", impact: { iman: 10, amal: 10, lalai: 0 }, feedback: "Kejujuran adalah mata uang yang berlaku di mana saja." },
+      { id: "b", text: "Pura-pura tidak lihat.", type: "neutral", impact: { iman: 0, amal: 0, lalai: 5 }, feedback: "Diammu menyelamatkan diri, tapi tidak mengubah keadaan." },
+      { id: "c", text: "Ambil contekannya, lumayan nilai bagus.", type: "bad", impact: { iman: -15, amal: 0, lalai: 10 }, feedback: "Nilai tinggi di kertas, nilai nol di mata Tuhan." }
+    ]
+  },
+  2: { // Gadget
+    title: "Notifikasi Menggoda",
+    scenario: "Sedang asyik tadarus Al-Qur'an, HP bergetar terus menerus. Teman-teman mengajak 'Mabar' Rank Match.",
+    location: "Ruang Tengah",
+    choices: [
+      { id: "a", text: "Abaikan HP, selesaikan target tadarus.", type: "good", impact: { iman: 10, amal: 15, lalai: 0 }, feedback: "Prioritasmu menentukan kualitasmu." },
+      { id: "b", text: "Balas chat sebentar, lalu lanjut baca.", type: "neutral", impact: { iman: 0, amal: 5, lalai: 5 }, feedback: "Fokusmu terpecah, kekhusyukan berkurang." },
+      { id: "c", text: "Langsung login game, tadarus nanti saja.", type: "bad", impact: { iman: -10, amal: 0, lalai: 15 }, feedback: "Dunia maya melalaikanmu dari dunia nyata dan akhirat." }
+    ]
+  },
+  3: { // Sosial
+    title: "Ghibah Circle",
+    scenario: "Saat istirahat, teman-temanmu mulai membicarakan aib seseorang yang tidak hadir.",
+    location: "Kantin Sekolah",
+    choices: [
+      { id: "a", text: "Ingatkan teman: 'Eh, jangan ghibah, dosa.'", type: "good", impact: { iman: 15, amal: 10, lalai: 0 }, feedback: "Mencegah kemungkaran selemah-lemahnya dengan lisan." },
+      { id: "b", text: "Pergi diam-diam dari situ.", type: "neutral", impact: { iman: 5, amal: 0, lalai: 0 }, feedback: "Menghindar selamat, tapi belum tentu menyelamatkan teman." },
+      { id: "c", text: "Ikut nimbrung seru, 'Eh iya kah?'", type: "bad", impact: { iman: -15, amal: 0, lalai: 10 }, feedback: "Lisanmu memakan bangkai saudaramu sendiri." }
+    ]
+  },
+  4: { // Orang Tua
+    title: "Perintah Ibu",
+    scenario: "Ibu memintamu membelikan garam di warung, padahal kamu sedang capek sekali pulang sekolah.",
+    location: "Dapur",
+    choices: [
+      { id: "a", text: "Langsung berangkat: 'Siap Bu!'", type: "good", impact: { iman: 10, amal: 20, lalai: 0 }, feedback: "Ridho Allah terletak pada ridho orang tua." },
+      { id: "b", text: "Nanti dulu Bu, istirahat sebentar.", type: "neutral", impact: { iman: 0, amal: 5, lalai: 5 }, feedback: "Menunda kebaikan bisa menghilangkan keberkahan." },
+      { id: "c", text: "Menggerutu: 'Ah, capek Bu!'", type: "bad", impact: { iman: -20, amal: 0, lalai: 10 }, feedback: "Satu kata 'Ah' bisa menghapus ribuan kebaikan." }
+    ]
+  },
+  5: { // Muhasabah
+    title: "Malam Renungan",
+    scenario: "Malam hari sebelum tidur. Hari ini banyak kejadian berlalu.",
+    location: "Kamar",
+    choices: [
+      { id: "a", text: "Ambil wudhu, shalat witir, istighfar.", type: "good", impact: { iman: 20, amal: 20, lalai: 0 }, feedback: "Menutup hari dengan cahaya." },
+      { id: "b", text: "Langsung tidur baca doa.", type: "neutral", impact: { iman: 5, amal: 5, lalai: 0 }, feedback: "Standar yang baik." },
+      { id: "c", text: "Scroll sosmed sampai ketiduran.", type: "bad", impact: { iman: -5, amal: 0, lalai: 10 }, feedback: "Waktu terbuang sia-sia hingga mimpi menjemput." }
+    ]
+  }
+};
+
+const GENERIC_FALLBACK: Omit<GameLevel, 'id'> = {
+  title: "Tantangan Kehidupan",
+  scenario: "Kamu dihadapkan pada pilihan sulit yang menguji keimananmu hari ini.",
+  location: "Dunia Fana",
+  choices: [
+    { id: "gen1", text: "Pilih jalan ketaatan meski berat.", type: "good", impact: { iman: 10, amal: 10, lalai: 0 }, feedback: "Jalan mendaki menuju surga." },
+    { id: "gen2", text: "Cari aman saja.", type: "neutral", impact: { iman: 0, amal: 5, lalai: 0 }, feedback: "Hidup mengalir tanpa arah pasti." },
+    { id: "gen3", text: "Ikuti hawa nafsu sesaat.", type: "bad", impact: { iman: -10, amal: 0, lalai: 10 }, feedback: "Kesenangan sesaat, penyesalan panjang." }
+  ]
+};
+
 // Utility to shuffle array
 function shuffleArray<T>(array: T[]): T[] {
   for (let i = array.length - 1; i > 0; i--) {
@@ -58,10 +133,16 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export const generateLevelContent = async (levelIndex: number): Promise<GameLevel> => {
-  if (!ai) throw new Error("API Key missing");
-
+  // Use fallback immediately if no API key, or wrapping the whole call in try/catch to fallback on API error
+  
   const theme = LEVEL_THEMES[levelIndex];
   
+  if (!ai) {
+    console.warn("No API Key. Using Fallback Level.");
+    const fallback = FALLBACK_LEVEL_DATA[levelIndex] || GENERIC_FALLBACK;
+    return { ...fallback, id: levelIndex + 1 };
+  }
+
   const prompt = `
     Kamu adalah Game Master untuk RPG Islami "Jejak Amal Harian".
     Buat level ke-${levelIndex + 1} dengan tema: "${theme}".
@@ -102,8 +183,16 @@ export const generateLevelContent = async (levelIndex: number): Promise<GameLeve
 
     return { ...data, id: levelIndex + 1 };
   } catch (error) {
-    console.error("Gemini Level Error:", error);
-    throw error;
+    console.warn("Gemini Level Error (Falling back to offline data):", error);
+    // Return Fallback Data on Error (e.g. Quota Exceeded 429)
+    const fallback = FALLBACK_LEVEL_DATA[levelIndex] || GENERIC_FALLBACK;
+    // Deep copy choices to avoid mutation issues if reused
+    const choices = fallback.choices.map(c => ({...c}));
+    return { 
+        ...fallback, 
+        choices: shuffleArray(choices),
+        id: levelIndex + 1 
+    };
   }
 };
 
@@ -112,7 +201,12 @@ export const generateNPCFeedback = async (
   lastChoiceText: string,
   levelTheme: string
 ): Promise<NPCFeedback> => {
-  if (!ai) throw new Error("API Key missing");
+  if (!ai) {
+    return {
+      dialogue: "Pilihanmu menentukan siapa dirimu. Teruslah berjuang di jalan kebaikan.",
+      wisdom: "Sesungguhnya Allah bersama orang-orang yang sabar."
+    };
+  }
 
   const prompt = `
     Berperan sebagai Ustadz Hasan, mentor yang bijak, hangat, dan tidak menghakimi di game RPG.
@@ -143,10 +237,10 @@ export const generateNPCFeedback = async (
     if (!text) throw new Error("AI Empty Response");
     return JSON.parse(text);
   } catch (error) {
-    console.error("Gemini NPC Error:", error);
+    console.warn("Gemini NPC Error (Falling back to offline data):", error);
     // Fallback if error
     return {
-      dialogue: "Hmm, pilihan yang menarik. Mari kita renungkan dampaknya bagi hati kita.",
+      dialogue: "Hmm, setiap langkah ada konsekuensinya. Mari kita renungkan dampaknya bagi hati kita.",
       wisdom: "Setiap amal tergantung pada niatnya."
     };
   }
@@ -181,7 +275,7 @@ export const generateSceneImage = async (scenario: string): Promise<string | nul
     }
     return null;
   } catch (error) {
-    console.warn("Image Generation Failed:", error);
+    console.warn("Image Generation Failed (Quota or Error):", error);
     return null;
   }
 }
